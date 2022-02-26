@@ -571,6 +571,7 @@ dependencies = [
 name = "rustgrpc"
 version = "0.1.0"
 dependencies = [
+ "async-stream",
  "prost",
  "tokio",
  "tonic",
