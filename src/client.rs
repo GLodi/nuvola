@@ -60,9 +60,9 @@ async fn read_file() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
 
 fn print_hash() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::open("input.txt")?;
-    let mut hasher = sha2::Sha256::new();
-    let n = std::io::copy(&mut file, &mut hasher)?;
+    let mut hasher = Sha256::new();
+    std::io::copy(&mut file, &mut hasher)?;
     let hash = hasher.finalize();
-    println!("file hash: {:?}", hash);
+    println!("file hash: {:?}", &hash);
     Ok(())
 }

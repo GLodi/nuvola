@@ -68,9 +68,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn print_hash() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = fs::File::open("output.txt")?;
-    let mut hasher = sha2::Sha256::new();
-    let n = std::io::copy(&mut file, &mut hasher)?;
+    let mut hasher = Sha256::new();
+    std::io::copy(&mut file, &mut hasher)?;
     let hash = hasher.finalize();
-    println!("file hash: {:?}", hash);
+    println!("file hash: {:?}", &hash);
     Ok(())
 }
