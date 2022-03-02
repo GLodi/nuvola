@@ -1,3 +1,5 @@
+use std::fs;
+
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
@@ -29,22 +31,24 @@ impl UploadService for Upload {
 
         println!("final stream: {:?}", &data);
 
-        match write_to_file(data) {
-            Ok(ok) => {}
-            Err(error) => {}
-        };
-
-        let upload_status = UploadStatus {
-            message: format!("ahah"),
-            code: UploadStatusCode::Ok.into(),
+        let upload_status = match write_to_file(data) {
+            Ok(()) => UploadStatus {
+                message: format!("corretto"),
+                code: UploadStatusCode::Ok.into(),
+            },
+            Err(error) => UploadStatus {
+                message: format!("{:?}", error),
+                code: UploadStatusCode::Failed.into(),
+            },
         };
 
         Ok(Response::new(upload_status))
     }
 }
 
-async fn write_to_file(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
-    Ok(());
+fn write_to_file(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
+    fs::write("output.txt", data).unwrap();
+    Ok(())
 }
 
 #[tokio::main]

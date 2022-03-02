@@ -40,7 +40,7 @@ async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn read_file() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    let f = File::open("prova.txt")?;
+    let f = File::open("input.txt")?;
     let mut reader = BufReader::new(f);
     let mut buffer = Vec::new();
 
