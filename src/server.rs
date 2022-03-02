@@ -1,35 +1,10 @@
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
-use hello_world::greeter_server::{Greeter, GreeterServer};
-use hello_world::{HelloReply, HelloRequest};
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
 use upload_service::{Chunk, UploadStatus, UploadStatusCode};
 
-pub mod hello_world {
-    tonic::include_proto!("helloworld");
-}
-
 pub mod upload_service {
     tonic::include_proto!("upload");
-}
-
-#[derive(Debug, Default)]
-pub struct MyGreeter {}
-
-#[tonic::async_trait]
-impl Greeter for MyGreeter {
-    async fn say_hello(
-        &self,
-        request: Request<HelloRequest>,
-    ) -> Result<Response<HelloReply>, Status> {
-        println!("Got a request: {:?}", request);
-
-        let reply = hello_world::HelloReply {
-            message: format!("Hello {}!", request.into_inner().name).into(),
-        };
-
-        Ok(Response::new(reply))
-    }
 }
 
 #[derive(Debug, Default)]
@@ -45,9 +20,19 @@ impl UploadService for Upload {
 
         let mut stream = request.into_inner();
 
-        while let Some(chunk) = stream.message().await? {
-            println!("chunk: {:?}", chunk);
+        let mut data: Vec<u8> = Vec::new();
+
+        while let Some(mut chunk) = stream.message().await? {
+            println!("chunk: {:?}", std::str::from_utf8(&chunk.content).unwrap());
+            data.append(&mut chunk.content);
         }
+
+        println!("final stream: {:?}", &data);
+
+        match write_to_file(data) {
+            Ok(ok) => {}
+            Err(error) => {}
+        };
 
         let upload_status = UploadStatus {
             message: format!("ahah"),
@@ -58,14 +43,16 @@ impl UploadService for Upload {
     }
 }
 
+async fn write_to_file(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
+    Ok(());
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
-    let greeter = MyGreeter::default();
     let upload = Upload::default();
 
     Server::builder()
-        .add_service(GreeterServer::new(greeter))
         .add_service(UploadServiceServer::new(upload))
         .serve(addr)
         .await?;
