@@ -1,7 +1,6 @@
-use std::fs;
-
-use sha2::{Digest, Sha256};
 use tonic::{transport::Server, Request, Response, Status, Streaming};
+
+mod utils;
 
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
 use upload_service::{Chunk, UploadStatus, UploadStatusCode};
@@ -32,7 +31,7 @@ impl UploadService for Upload {
 
         println!("final stream: {:?}", &data);
 
-        let upload_status = match write_to_file(data) {
+        let upload_status = match utils::file::write("output.txt", data) {
             Ok(()) => UploadStatus {
                 message: format!("corretto"),
                 code: UploadStatusCode::Ok.into(),
@@ -43,14 +42,10 @@ impl UploadService for Upload {
             },
         };
 
+        utils::hash::print("output.txt").expect("Error printing hash");
+
         Ok(Response::new(upload_status))
     }
-}
-
-fn write_to_file(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
-    fs::write("output.txt", data).unwrap();
-    print_hash()?;
-    Ok(())
 }
 
 #[tokio::main]
@@ -63,14 +58,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .serve(addr)
         .await?;
 
-    Ok(())
-}
-
-fn print_hash() -> Result<(), Box<dyn std::error::Error>> {
-    let mut file = fs::File::open("output.txt")?;
-    let mut hasher = Sha256::new();
-    std::io::copy(&mut file, &mut hasher)?;
-    let hash = hasher.finalize();
-    println!("file hash: {:?}", &hash);
     Ok(())
 }
