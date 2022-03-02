@@ -1,5 +1,6 @@
 use std::fs;
 
+use sha2::{Digest, Sha256};
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
@@ -48,6 +49,7 @@ impl UploadService for Upload {
 
 fn write_to_file(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
     fs::write("output.txt", data).unwrap();
+    print_hash()?;
     Ok(())
 }
 
@@ -61,5 +63,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .serve(addr)
         .await?;
 
+    Ok(())
+}
+
+fn print_hash() -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = fs::File::open("output.txt")?;
+    let mut hasher = sha2::Sha256::new();
+    let n = std::io::copy(&mut file, &mut hasher)?;
+    let hash = hasher.finalize();
+    println!("file hash: {:?}", hash);
     Ok(())
 }

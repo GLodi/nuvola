@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::Read;
 
+use sha2::{Digest, Sha256};
 use tonic::Request;
 
 use upload_service::upload_service_client::UploadServiceClient;
@@ -47,10 +48,21 @@ async fn read_file() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     // Read file into vector.
     reader.read_to_end(&mut buffer)?;
 
+    print_hash()?;
+
     // Read.
     for value in &buffer {
         println!("BYTE: {}", value);
     }
 
     Ok(buffer)
+}
+
+fn print_hash() -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = File::open("input.txt")?;
+    let mut hasher = sha2::Sha256::new();
+    let n = std::io::copy(&mut file, &mut hasher)?;
+    let hash = hasher.finalize();
+    println!("file hash: {:?}", hash);
+    Ok(())
 }
