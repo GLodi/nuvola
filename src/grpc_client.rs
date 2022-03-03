@@ -1,0 +1,40 @@
+use tonic::Request;
+
+use upload_service::upload_service_client::UploadServiceClient;
+use upload_service::Chunk;
+
+mod utils;
+
+pub mod upload_service {
+    tonic::include_proto!("upload");
+}
+
+async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
+    let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
+    let file = utils::file::read("input.txt")?;
+
+    utils::hash::print("input.txt")?;
+
+    let outbound = async_stream::stream! {
+        for byte in file.iter() {
+            let chunk = Chunk {
+                content: vec![*byte],
+            };
+
+            yield chunk;
+        }
+    };
+
+    let response = client.upload(Request::new(outbound)).await?;
+    let inbound = response.into_inner();
+
+    println!("upload status = {:?}", inbound.message);
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    upload_request().await?;
+    Ok(())
+}

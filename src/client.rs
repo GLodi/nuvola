@@ -1,40 +1,20 @@
-use tonic::Request;
+use notify::{watcher, RecursiveMode, Watcher};
+use std::sync::mpsc::channel;
+use std::time::Duration;
 
-use upload_service::upload_service_client::UploadServiceClient;
-use upload_service::Chunk;
+fn main() {
+    let (tx, rx) = channel();
 
-mod utils;
+    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
 
-pub mod upload_service {
-    tonic::include_proto!("upload");
-}
+    watcher
+        .watch("/Users/giulio/dev/rustgrpc/data", RecursiveMode::Recursive)
+        .unwrap();
 
-async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
-    let file = utils::file::read("input.txt")?;
-
-    utils::hash::print("input.txt")?;
-
-    let outbound = async_stream::stream! {
-        for byte in file.iter() {
-            let chunk = Chunk {
-                content: vec![*byte],
-            };
-
-            yield chunk;
+    loop {
+        match rx.recv() {
+            Ok(event) => println!("{:?}", event),
+            Err(e) => println!("watch error: {:?}", e),
         }
-    };
-
-    let response = client.upload(Request::new(outbound)).await?;
-    let inbound = response.into_inner();
-
-    println!("upload status = {:?}", inbound.message);
-
-    Ok(())
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    upload_request().await?;
-    Ok(())
+    }
 }
