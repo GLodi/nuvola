@@ -3,11 +3,11 @@ use tonic::Request;
 use upload_service::upload_service_client::UploadServiceClient;
 use upload_service::Chunk;
 
-mod utils;
-
 pub mod upload_service {
     tonic::include_proto!("upload");
 }
+
+use crate::utils;
 
 async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
@@ -34,7 +34,7 @@ async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn client_main() -> Result<(), Box<dyn std::error::Error>> {
     upload_request().await?;
     Ok(())
 }
