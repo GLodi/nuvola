@@ -9,7 +9,7 @@ pub mod upload_service {
 
 use crate::utils;
 
-async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
     let file = utils::file::read("input.txt")?;
 
@@ -30,11 +30,5 @@ async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("upload status = {:?}", inbound.message);
 
-    Ok(())
-}
-
-#[tokio::main]
-pub async fn client_main() -> Result<(), Box<dyn std::error::Error>> {
-    upload_request().await?;
     Ok(())
 }

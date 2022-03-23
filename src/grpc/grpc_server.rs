@@ -48,7 +48,6 @@ impl UploadService for Upload {
     }
 }
 
-#[tokio::main]
 pub async fn server_main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
     let upload = Upload::default();

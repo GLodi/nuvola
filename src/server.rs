@@ -1,6 +1,7 @@
-mod grpc;
-mod utils;
+use rustgrpc::grpc;
 
-fn main() {
-    grpc::grpc_server::server_main();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    grpc::grpc_server::server_main().await?;
+    Ok(())
 }
