@@ -28,6 +28,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // grpc::grpc_client::upload_request().await?;
 
-    utils::reed::encode();
+    let file_vec = match utils::file::read("data_client/input.txt") {
+        Ok(buffer) => buffer,
+        Err(e) => panic!("no file at location"),
+    };
+
+    utils::reed::encode(file_vec);
     Ok(())
 }
