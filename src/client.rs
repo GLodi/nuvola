@@ -4,6 +4,7 @@ use std::time::Duration;
 
 extern crate reed_solomon_erasure;
 
+use rustgrpc::grpc;
 use rustgrpc::utils;
 
 #[tokio::main]
@@ -26,13 +27,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     }
     // }
 
-    // grpc::grpc_client::upload_request().await?;
-
     let file_vec = match utils::file::read("data_client/input.txt") {
         Ok(buffer) => buffer,
-        Err(e) => panic!("no file at location"),
+        Err(_) => panic!("no file at location"),
     };
 
-    utils::reed::encode(file_vec);
+    let encoded_file = utils::reed::encode(&file_vec);
+
+    println!("encoded stream sending:");
+    println!("{encoded_file:?}");
+
+    grpc::grpc_client::upload_request(encoded_file).await?;
+
     Ok(())
 }

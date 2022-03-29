@@ -9,14 +9,13 @@ pub mod upload_service {
 
 use crate::utils;
 
-pub async fn upload_request() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
     let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
-    let file = utils::file::read("input.txt")?;
 
-    utils::hash::print("input.txt")?;
+    utils::hash::print(&data)?;
 
     let outbound = async_stream::stream! {
-        for byte in file.iter() {
+        for byte in data.iter() {
             let chunk = Chunk {
                 content: vec![*byte],
             };

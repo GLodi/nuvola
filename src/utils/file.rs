@@ -9,9 +9,9 @@ pub fn read(path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
 
     reader.read_to_end(&mut buffer)?;
 
-    for value in &buffer {
-        println!("BYTE: {}", value);
-    }
+    // for value in &buffer {
+    //     println!("BYTE: {}", value);
+    // }
 
     Ok(buffer)
 }

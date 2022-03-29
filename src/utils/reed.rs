@@ -1,6 +1,6 @@
 use reed_solomon_erasure::galois_8::ReedSolomon;
 
-pub fn encode(data: Vec<u8>) {
+pub fn encode(data: &Vec<u8>) -> Vec<u8> {
     let chunk_length = 4;
     let data_chunk_amount = data.chunks(chunk_length).into_iter().count();
     let parity_chunk_amount = 2;
@@ -26,6 +26,8 @@ pub fn encode(data: Vec<u8>) {
     // Construct the parity shards
     r.encode(&mut master_copy).unwrap();
 
+    let encoded = master_copy.clone().into_iter().flatten().collect();
+
     println!("encoded:");
     println!("{master_copy:?}");
     println!();
@@ -50,8 +52,10 @@ pub fn encode(data: Vec<u8>) {
     println!();
 
     // Convert back to normal shard arrangement
-    let result: Vec<_> = shards.into_iter().filter_map(|x| x).collect();
+    let reconstructed: Vec<_> = shards.into_iter().filter_map(|x| x).collect();
 
-    assert!(r.verify(&result).unwrap());
-    assert_eq!(master_copy, result);
+    assert!(r.verify(&reconstructed).unwrap());
+    assert_eq!(master_copy, reconstructed);
+
+    encoded
 }

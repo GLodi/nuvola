@@ -25,13 +25,15 @@ impl UploadService for Upload {
         let mut data: Vec<u8> = Vec::new();
 
         while let Some(mut chunk) = stream.message().await? {
-            println!("chunk: {:?}", std::str::from_utf8(&chunk.content).unwrap());
+            // println!("chunk: {:?}", &chunk.content);
             data.append(&mut chunk.content);
         }
 
         println!("final stream: {:?}", &data);
 
-        let upload_status = match utils::file::write("output.txt", data) {
+        utils::hash::print(&data).expect("Error printing hash");
+
+        let upload_status = match utils::file::write("data_server/output.txt", data) {
             Ok(()) => UploadStatus {
                 message: format!("corretto"),
                 code: UploadStatusCode::Ok.into(),
@@ -41,8 +43,6 @@ impl UploadService for Upload {
                 code: UploadStatusCode::Failed.into(),
             },
         };
-
-        utils::hash::print("output.txt").expect("Error printing hash");
 
         Ok(Response::new(upload_status))
     }
