@@ -9,24 +9,31 @@ use rustgrpc::utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let (tx, rx) = channel();
+    send_file().await;
+    Ok(())
+}
 
-    // let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+async fn observe() -> Result<(), Box<dyn std::error::Error>> {
+    let (tx, rx) = channel();
 
-    // watcher
-    //     .watch(
-    //         "/Users/giulio/dev/rustgrpc/data_client",
-    //         RecursiveMode::Recursive,
-    //     )
-    //     .unwrap();
+    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
 
-    // loop {
-    //     match rx.recv() {
-    //         Ok(event) => println!("{:?}", event),
-    //         Err(e) => println!("watch error: {:?}", e),
-    //     }
-    // }
+    watcher
+        .watch(
+            "/Users/giulio/dev/rustgrpc/data_client",
+            RecursiveMode::Recursive,
+        )
+        .unwrap();
 
+    loop {
+        match rx.recv() {
+            Ok(event) => println!("{:?}", event),
+            Err(e) => println!("watch error: {:?}", e),
+        }
+    }
+}
+
+async fn send_file() -> Result<(), Box<dyn std::error::Error>> {
     let file_vec = match utils::file::read("data_client/input.txt") {
         Ok(buffer) => buffer,
         Err(_) => panic!("no file at location"),

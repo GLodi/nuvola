@@ -3,7 +3,7 @@ use reed_solomon_erasure::galois_8::ReedSolomon;
 pub fn encode(data: &Vec<u8>) -> Vec<u8> {
     let chunk_length = 4;
     let data_chunk_amount = data.chunks(chunk_length).into_iter().count();
-    let parity_chunk_amount = 2;
+    let parity_chunk_amount = 3;
 
     let r = ReedSolomon::new(data_chunk_amount, parity_chunk_amount).unwrap(); // 3 data shards, 2 parity shards
 
@@ -37,8 +37,9 @@ pub fn encode(data: &Vec<u8>) -> Vec<u8> {
     let mut shards: Vec<_> = master_copy.iter().cloned().map(Some).collect();
 
     // We can remove up to 2 shards, which may be data or parity shards
-    shards[0] = None;
-    shards[4] = None;
+    for i in 0..parity_chunk_amount {
+        shards[i] = None;
+    }
 
     println!("after data loss:");
     println!("{shards:?}");
