@@ -1,7 +1,7 @@
 use tonic::Request;
 
 use upload_service::upload_service_client::UploadServiceClient;
-use upload_service::{upload_request::Data, ImageInfo, UploadRequest};
+use upload_service::{upload_request::Data, FileInfo, UploadRequest};
 
 pub mod upload_service {
     tonic::include_proto!("upload");
@@ -15,13 +15,13 @@ pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Err
     utils::hash::print(&data)?;
 
     let request_stream = async_stream::stream! {
-        let image_info: ImageInfo = ImageInfo {
-            image_type: "hello".to_string(),
+        let file_info: FileInfo = FileInfo {
+            file_type: "hello".to_string(),
             pc_id: "hello".to_string(),
         };
 
-        let image_data: Option<Data> = Some(Data::ImageInfo(image_info));
-        yield UploadRequest {data: image_data};
+        let file_data: Option<Data> = Some(Data::FileInfo(file_info));
+        yield UploadRequest {data: file_data};
 
         for byte in data.iter() {
 

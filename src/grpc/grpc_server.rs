@@ -4,7 +4,7 @@ use tonic::{transport::Server, Request, Response, Status, Streaming};
 
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
 use upload_service::{
-    upload_request::Data, ImageInfo, UploadRequest, UploadStatus, UploadStatusCode,
+    upload_request::Data, FileInfo, UploadRequest, UploadStatus, UploadStatusCode,
 };
 
 pub mod upload_service {
@@ -56,16 +56,16 @@ impl UploadService for Upload {
 
 async fn read_upload_request(
     request: Request<Streaming<UploadRequest>>,
-) -> Result<(Option<ImageInfo>, Vec<u8>), Box<dyn std::error::Error>> {
+) -> Result<(Option<FileInfo>, Vec<u8>), Box<dyn std::error::Error>> {
     let mut stream = request.into_inner();
 
-    let mut image_info: Option<ImageInfo> = None;
+    let mut file_info: Option<FileInfo> = None;
     let mut chunks = Vec::new();
 
     while let Some(upload_request) = stream.message().await? {
         match upload_request.data {
-            Some(Data::ImageInfo(info)) => {
-                image_info = Some(info);
+            Some(Data::FileInfo(info)) => {
+                file_info = Some(info);
             }
             Some(Data::ChunkData(mut chunk_data)) => {
                 chunks.append(&mut chunk_data);
@@ -73,7 +73,7 @@ async fn read_upload_request(
             None => {}
         }
     }
-    Ok((image_info, chunks))
+    Ok((file_info, chunks))
 }
 
 pub async fn server_main() -> Result<(), Box<dyn std::error::Error>> {

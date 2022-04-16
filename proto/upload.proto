@@ -7,14 +7,14 @@ service UploadService {
 
 message UploadRequest {
     oneof data {
-        ImageInfo image_info = 1;
+        FileInfo file_info = 1;
         bytes chunk_data = 2;
     };
 }
 
-message ImageInfo {
+message FileInfo {
     string pc_id = 1;
-    string image_type = 2;
+    string file_type = 2;
 }
 
 enum UploadStatusCode {
