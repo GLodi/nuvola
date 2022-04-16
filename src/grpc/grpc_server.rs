@@ -1,7 +1,11 @@
+use std::result;
+
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
-use upload_service::{Chunk, UploadStatus, UploadStatusCode};
+use upload_service::{
+    upload_request::Data, ImageInfo, UploadRequest, UploadStatus, UploadStatusCode,
+};
 
 pub mod upload_service {
     tonic::include_proto!("upload");
@@ -16,24 +20,26 @@ pub struct Upload {}
 impl UploadService for Upload {
     async fn upload(
         &self,
-        request: Request<Streaming<Chunk>>,
+        request: Request<Streaming<UploadRequest>>,
     ) -> Result<Response<UploadStatus>, Status> {
         println!("Got a request: {:?}", request);
 
-        let mut stream = request.into_inner();
+        let result = read_upload_request(request).await;
 
-        let mut data: Vec<u8> = Vec::new();
-
-        while let Some(mut chunk) = stream.message().await? {
-            // println!("chunk: {:?}", &chunk.content);
-            data.append(&mut chunk.content);
+        if let Err(error) = result {
+            return Ok(Response::new(UploadStatus {
+                message: format!("{:?}", error),
+                code: UploadStatusCode::Failed.into(),
+            }));
         }
 
-        println!("final stream: {:?}", &data);
+        let (file_data, chunks) = result.unwrap();
 
-        utils::hash::print(&data).expect("Error printing hash");
+        println!("final stream: {:?}", &chunks);
 
-        let upload_status = match utils::file::write("data_server/output.txt", data) {
+        utils::hash::print(&chunks).expect("Error printing hash");
+
+        let upload_status = match utils::file::write("data_server/output.txt", chunks) {
             Ok(()) => UploadStatus {
                 message: format!("corretto"),
                 code: UploadStatusCode::Ok.into(),
@@ -46,6 +52,28 @@ impl UploadService for Upload {
 
         Ok(Response::new(upload_status))
     }
+}
+
+async fn read_upload_request(
+    request: Request<Streaming<UploadRequest>>,
+) -> Result<(Option<ImageInfo>, Vec<u8>), Box<dyn std::error::Error>> {
+    let mut stream = request.into_inner();
+
+    let mut image_info: Option<ImageInfo> = None;
+    let mut chunks = Vec::new();
+
+    while let Some(upload_request) = stream.message().await? {
+        match upload_request.data {
+            Some(Data::ImageInfo(info)) => {
+                image_info = Some(info);
+            }
+            Some(Data::ChunkData(mut chunk_data)) => {
+                chunks.append(&mut chunk_data);
+            }
+            None => {}
+        }
+    }
+    Ok((image_info, chunks))
 }
 
 pub async fn server_main() -> Result<(), Box<dyn std::error::Error>> {

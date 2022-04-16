@@ -2,20 +2,28 @@ syntax = "proto3";
 package upload;
 
 service UploadService {
-    rpc Upload(stream Chunk) returns (UploadStatus);
+    rpc Upload(stream UploadRequest) returns (UploadStatus);
 }
 
-message Chunk {
-        bytes content = 1;
+message UploadRequest {
+    oneof data {
+        ImageInfo image_info = 1;
+        bytes chunk_data = 2;
+    };
+}
+
+message ImageInfo {
+    string pc_id = 1;
+    string image_type = 2;
 }
 
 enum UploadStatusCode {
-        Unknown = 0;
-        Ok = 1;
-        Failed = 2;
+    Unknown = 0;
+    Ok = 1;
+    Failed = 2;
 }
 
 message UploadStatus {
-        string message = 1;
-        UploadStatusCode code = 2;
+    string message = 1;
+    UploadStatusCode code = 2;
 }
