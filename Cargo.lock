@@ -804,6 +804,7 @@ dependencies = [
  "reed-solomon-erasure",
  "sha2",
  "tokio",
+ "tokio-stream",
  "tonic",
  "tonic-build",
 ]

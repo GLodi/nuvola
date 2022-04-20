@@ -24,14 +24,10 @@ pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Err
         yield UploadRequest {data: file_data};
 
         for byte in data.iter() {
+            let bytes = vec![*byte];
+            let chunk_data: Option<Data> = Some(Data::ChunkData(bytes));
 
-            // let chunk_data = upload_service::upload_request:: {
-
-            //     chunk_data: vec![*byte],
-            // };
-
-            // yield chunk_data;
-            // yield UploadRequest {data: data};
+            yield UploadRequest {data: chunk_data};
         }
     };
 
