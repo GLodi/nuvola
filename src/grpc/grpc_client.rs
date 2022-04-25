@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use tonic::Request;
 
 use upload_service::upload_service_client::UploadServiceClient;
@@ -23,15 +25,21 @@ pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Err
         let file_data: Option<Data> = Some(Data::FileInfo(file_info));
         yield UploadRequest {data: file_data};
 
+
+        // let mut interval = tokio::time::interval(Duration::from_secs(1));
         for byte in data.iter() {
             let bytes = vec![*byte];
             let chunk_data: Option<Data> = Some(Data::ChunkData(bytes));
 
+            // interval.tick().await;
+
+            println!("{:?}", utils::time::get_epoch_ms());
             yield UploadRequest {data: chunk_data};
         }
     };
 
     let response = client.upload(Request::new(request_stream)).await?;
+
     let inbound = response.into_inner();
 
     println!("upload status = {:?}", inbound.message);

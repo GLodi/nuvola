@@ -1,4 +1,3 @@
-use tokio_stream::StreamExt;
 use tonic::Streaming;
 use tonic::{transport::Server, Request, Response, Status};
 
@@ -35,7 +34,9 @@ impl UploadService for Upload {
 
         let (file_info, chunks) = result.unwrap();
 
-        println!("final stream file_info: {:?}", file_info.unwrap().file_type);
+        if let Some(file_info) = file_info {
+            println!("final stream file_info: {:?}", file_info.file_type);
+        }
         println!("final stream chunks: {:?}", &chunks);
 
         utils::hash::print(&chunks).expect("Error printing hash");
@@ -63,8 +64,8 @@ async fn read_upload_request(
     let mut file_info: Option<FileInfo> = None;
     let mut chunks = Vec::new();
 
-    while let Some(upload_request) = stream.next().await {
-        let upload_request = upload_request?;
+    while let Some(upload_request) = stream.message().await? {
+        println!("{:?}", utils::time::get_epoch_ms());
 
         match upload_request.data {
             Some(Data::FileInfo(info)) => {
@@ -76,6 +77,7 @@ async fn read_upload_request(
             None => {}
         }
     }
+
     Ok((file_info, chunks))
 }
 
