@@ -1,6 +1,3 @@
-use tonic::Streaming;
-use tonic::{transport::Server, Request, Response, Status};
-
 use upload_service::upload_service_server::{UploadService, UploadServiceServer};
 use upload_service::{
     upload_request::Data, FileInfo, UploadRequest, UploadStatus, UploadStatusCode,
@@ -19,14 +16,14 @@ pub struct Upload {}
 impl UploadService for Upload {
     async fn upload(
         &self,
-        request: Request<Streaming<UploadRequest>>,
-    ) -> Result<Response<UploadStatus>, Status> {
+        request: tonic::Request<tonic::Streaming<UploadRequest>>,
+    ) -> Result<tonic::Response<UploadStatus>, tonic::Status> {
         println!("Got a request: {:?}", request);
 
         let result = read_upload_request(request).await;
 
         if let Err(error) = result {
-            return Ok(Response::new(UploadStatus {
+            return Ok(tonic::Response::new(UploadStatus {
                 message: format!("{:?}", error),
                 code: UploadStatusCode::Failed.into(),
             }));
@@ -52,12 +49,12 @@ impl UploadService for Upload {
             },
         };
 
-        Ok(Response::new(upload_status))
+        Ok(tonic::Response::new(upload_status))
     }
 }
 
 async fn read_upload_request(
-    request: Request<Streaming<UploadRequest>>,
+    request: tonic::Request<tonic::Streaming<UploadRequest>>,
 ) -> Result<(Option<FileInfo>, Vec<u8>), Box<dyn std::error::Error>> {
     let mut stream = request.into_inner();
 
@@ -85,7 +82,7 @@ pub async fn server_main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
     let upload = Upload::default();
 
-    Server::builder()
+    tonic::transport::Server::builder()
         .add_service(UploadServiceServer::new(upload))
         .serve(addr)
         .await?;
