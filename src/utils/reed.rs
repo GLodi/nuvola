@@ -1,22 +1,22 @@
 use reed_solomon_erasure::galois_8::ReedSolomon;
 
 pub fn encode(data: &Vec<u8>) -> Vec<u8> {
-    let chunk_length = 4;
-    let data_chunk_amount = data.chunks(chunk_length).into_iter().count();
+    let bytes_per_chunk = 4;
+    let data_chunk_amount = data.chunks(bytes_per_chunk).into_iter().count();
     let parity_chunk_amount = 3;
 
-    let r = ReedSolomon::new(data_chunk_amount, parity_chunk_amount).unwrap(); // 3 data shards, 2 parity shards
+    let r = ReedSolomon::new(data_chunk_amount, parity_chunk_amount).unwrap();
 
     let mut master_copy = vec![];
 
-    for chunk in data.chunks(chunk_length) {
+    for chunk in data.chunks(bytes_per_chunk) {
         let mut c = chunk.to_vec();
-        c.resize(chunk_length, 0);
+        c.resize(bytes_per_chunk, 0);
         master_copy.push(c);
     }
 
     for _ in 0..parity_chunk_amount {
-        master_copy.push(vec![0; chunk_length]);
+        master_copy.push(vec![0; bytes_per_chunk]);
     }
 
     println!("before encoding:");

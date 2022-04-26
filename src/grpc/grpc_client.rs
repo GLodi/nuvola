@@ -22,12 +22,12 @@ pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Err
         yield UploadRequest {data: file_data};
 
 
-        // let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
         for byte in data.iter() {
             let bytes = vec![*byte];
             let chunk_data: Option<Data> = Some(Data::ChunkData(bytes));
 
-            // interval.tick().await;
+            interval.tick().await;
 
             println!("{:?}", utils::time::get_epoch_ms());
             yield UploadRequest {data: chunk_data};

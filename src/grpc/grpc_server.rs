@@ -75,6 +75,7 @@ async fn read_upload_request(
         }
     }
 
+    println!("done");
     Ok((file_info, chunks))
 }
 
@@ -83,6 +84,7 @@ pub async fn server_main() -> Result<(), Box<dyn std::error::Error>> {
     let upload = Upload::default();
 
     tonic::transport::Server::builder()
+        .timeout(std::time::Duration::from_secs(10))
         .add_service(UploadServiceServer::new(upload))
         .serve(addr)
         .await?;

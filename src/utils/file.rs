@@ -4,6 +4,7 @@ use std::io::Read;
 
 pub fn read(path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let f = File::open(path)?;
+    let meta = f.metadata()?;
     let mut reader = BufReader::new(f);
     let mut buffer = Vec::new();
 
