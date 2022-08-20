@@ -6,13 +6,8 @@ use notify::{watcher, RecursiveMode, Watcher};
 use rustgrpc::grpc;
 use rustgrpc::utils;
 
-#[macro_use]
-extern crate diesel;
 extern crate dotenv;
 extern crate reed_solomon_erasure;
-
-mod db;
-use db::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

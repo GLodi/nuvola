@@ -1,47 +1,22 @@
-pub mod models;
-pub mod schema;
+use std::collections::HashMap;
 
-use diesel::prelude::*;
-use dotenv::dotenv;
-use std::env;
-use uuid::Uuid;
+extern crate rustbreak;
+use rustbreak::{deser::Ron, MemoryDatabase};
 
-use models::*;
-use schema::metafile;
-use schema::metafile::dsl::*;
+fn main() -> rustbreak::Result<()> {
+    let db = MemoryDatabase::<HashMap<u32, String>, Ron>::memory(HashMap::new())?;
 
-fn establish_connection() -> SqliteConnection {
-    dotenv().ok();
+    println!("Writing to Database");
+    db.write(|db| {
+        db.insert(0, String::from("world"));
+        db.insert(1, String::from("bar"));
+    });
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
+    db.read(|db| {
+        // db.insert("foo".into(), String::from("bar"));
+        // The above line will not compile since we are only reading
+        println!("Hello: {:?}", db.get(&0));
+    })?;
 
-pub fn get_metafiles() -> Vec<Metafile> {
-    let connection = establish_connection();
-
-    metafile
-        .limit(5)
-        .load::<Metafile>(&connection)
-        .expect("Error loading metafiles")
-}
-
-pub fn create_metafile(t: &str, b: &str) -> String {
-    let connection = establish_connection();
-
-    let uuid = Uuid::new_v4().as_hyphenated().to_string();
-
-    let new_metafile = NewMetafile {
-        id: &uuid,
-        name: t,
-        path: b,
-    };
-
-    diesel::insert_into(metafile::table)
-        .values(&new_metafile)
-        .execute(&connection)
-        .expect("Error saving new metafile");
-
-    uuid
+    Ok(())
 }
