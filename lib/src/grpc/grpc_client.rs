@@ -5,12 +5,13 @@ pub mod upload_service {
     tonic::include_proto!("upload");
 }
 
+use crate::fs;
 use crate::utils;
 
 pub async fn upload_request(data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
     let mut client = UploadServiceClient::connect("http://[::1]:50051").await?;
 
-    utils::hash::print(&data)?;
+    fs::hash::print(&data)?;
 
     let request_stream = async_stream::stream! {
         let file_info: FileInfo = FileInfo {

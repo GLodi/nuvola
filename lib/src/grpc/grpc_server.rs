@@ -7,6 +7,7 @@ pub mod upload_service {
     tonic::include_proto!("upload");
 }
 
+use crate::fs;
 use crate::utils;
 
 #[derive(Debug, Default)]
@@ -36,9 +37,9 @@ impl UploadService for Upload {
         }
         println!("final stream chunks: {:?}", &chunks);
 
-        utils::hash::print(&chunks).expect("Error printing hash");
+        fs::hash::print(&chunks).expect("Error printing hash");
 
-        let upload_status = match utils::file::write("data_server/output.txt", chunks) {
+        let upload_status = match fs::file::write("data_server/output.txt", chunks) {
             Ok(()) => UploadStatus {
                 message: format!("corretto"),
                 code: UploadStatusCode::Ok.into(),

@@ -1,6 +1,5 @@
-use rustgrpc::grpc;
+use nuvola::grpc;
 
-extern crate diesel;
 extern crate dotenv;
 
 #[tokio::main]

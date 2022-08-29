@@ -3,16 +3,25 @@ use std::time::Duration;
 
 use notify::{watcher, RecursiveMode, Watcher};
 
-use rustgrpc::grpc;
-use rustgrpc::utils;
+use nuvola::enc;
+use nuvola::fs;
+use nuvola::grpc;
 
 extern crate dotenv;
-extern crate reed_solomon_erasure;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    send_file().await;
+    // send_file().await;
+    encrypt();
     Ok(())
+}
+
+fn encrypt() {
+    let file_vec = match fs::file::read("data_client/input.txt") {
+        Ok(buffer) => buffer,
+        Err(_) => panic!("no file at location"),
+    };
+    enc::enc::encrypt_file(&file_vec);
 }
 
 async fn observe() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,7 +31,7 @@ async fn observe() -> Result<(), Box<dyn std::error::Error>> {
 
     watcher
         .watch(
-            "/Users/giulio/dev/rustgrpc/data_client",
+            "/Users/giulio/dev/nuvola/data_client",
             RecursiveMode::Recursive,
         )
         .unwrap();
@@ -36,12 +45,12 @@ async fn observe() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn send_file() -> Result<(), Box<dyn std::error::Error>> {
-    let file_vec = match utils::file::read("data_client/input.txt") {
+    let file_vec = match fs::file::read("data_client/input.txt") {
         Ok(buffer) => buffer,
         Err(_) => panic!("no file at location"),
     };
 
-    let encoded_file = utils::reed::encode(&file_vec);
+    let encoded_file = fs::reed::encode(&file_vec);
 
     println!("encoded stream sending:");
     println!("{encoded_file:?}");
