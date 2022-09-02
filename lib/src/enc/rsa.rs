@@ -1,6 +1,9 @@
 use rsa::{PaddingScheme, PublicKey, RsaPrivateKey, RsaPublicKey};
 
-pub fn encrypt_file(file: &Vec<u8>) {
+pub fn encrypt_file(file: &Vec<u8>) -> Vec<u8> {
+    println!("Original:");
+    println!("{:?}", std::str::from_utf8(file).unwrap());
+
     println!("Start encrypt_file");
     let mut rng = rand::thread_rng();
 
@@ -25,5 +28,7 @@ pub fn encrypt_file(file: &Vec<u8>) {
         .expect("failed to decrypt");
     assert_eq!(&file[..], &dec_data[..]);
     println!("Decrypted");
-    println!("{dec_data:?}");
+    println!("{:?}", std::str::from_utf8(&dec_data).unwrap());
+
+    enc_data
 }

@@ -4,6 +4,6 @@ extern crate dotenv;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    grpc::grpc_server::server_main().await?;
+    grpc::server::server_main().await?;
     Ok(())
 }

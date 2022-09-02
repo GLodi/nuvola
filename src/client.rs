@@ -21,7 +21,7 @@ fn encrypt() {
         Ok(buffer) => buffer,
         Err(_) => panic!("no file at location"),
     };
-    enc::enc::encrypt_file(&file_vec);
+    enc::rsa::encrypt_file(&file_vec);
 }
 
 async fn observe() -> Result<(), Box<dyn std::error::Error>> {
@@ -55,7 +55,7 @@ async fn send_file() -> Result<(), Box<dyn std::error::Error>> {
     println!("encoded stream sending:");
     println!("{encoded_file:?}");
 
-    grpc::grpc_client::upload_request(encoded_file).await?;
+    grpc::client::upload_request(encoded_file).await?;
 
     Ok(())
 }

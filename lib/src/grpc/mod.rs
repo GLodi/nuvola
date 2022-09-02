@@ -1,2 +1,2 @@
-pub mod grpc_client;
-pub mod grpc_server;
+pub mod client;
+pub mod server;
