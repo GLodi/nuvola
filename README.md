@@ -10,7 +10,7 @@ Each node uses a distributed hash table (similar to
 that it had previously uploaded to the network. 
 Files are encrypted and split into fragments before being uploaded.
 By using erasure codes, nodes avoid long-tail responses during download
-operations and provide redundancy. This guarantees better durability in case of
+operations and provide redundancy: this guarantees better durability in case of
 non-responsive nodes and is a more efficient option than replication as it 
 requires less bandwidth.
 

@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use notify::{watcher, RecursiveMode, Watcher};
 
+use nuvola::db;
 use nuvola::enc;
 use nuvola::fs;
 use nuvola::grpc;
@@ -12,7 +13,8 @@ extern crate dotenv;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // send_file().await;
-    encrypt();
+    // encrypt();
+    db::init::main();
     Ok(())
 }
 

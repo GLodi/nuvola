@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 extern crate rustbreak;
-use rustbreak::{deser::Ron, MemoryDatabase};
+use rustbreak::{deser::Bincode, FileDatabase};
 
-fn main() -> rustbreak::Result<()> {
-    let db = MemoryDatabase::<HashMap<u32, String>, Ron>::memory(HashMap::new())?;
+pub fn main() -> rustbreak::Result<()> {
+    let db = FileDatabase::<HashMap<u64, String>, Bincode>::load_from_path_or_default("test.bin")?;
 
     println!("Writing to Database");
     db.write(|db| {

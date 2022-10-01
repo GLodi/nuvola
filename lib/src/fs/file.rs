@@ -17,6 +17,7 @@ pub fn read(path: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     Ok(buffer)
 }
 
+// TODO: should stored fragments be encrypted by storage node too?
 pub fn write(path: &str, data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
     std::fs::write(path, data).unwrap();
     Ok(())
